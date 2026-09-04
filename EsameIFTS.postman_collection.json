@@ -1,0 +1,376 @@
+{
+  "info": {
+    "_postman_id": "fa62b917-d251-4b37-83f7-62653a1a5646",
+    "name": "EsameIFTS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49859432",
+    "_collection_link": "https://go.postman.co/collection/49859432-fa62b917-d251-4b37-83f7-62653a1a5646?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "autori",
+      "item": [
+        {
+          "name": "ottieni la lista di tutti gli autor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/autori",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "autori"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crea un nuovo autore",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Lev\",\r\n  \"cognome\": \"Tolstoj\",\r\n  \"nazionalita\": \"Russa\",\r\n  \"annoNascita\": 1828\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/autori",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "autori"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ottieni i dettagli di un autore in particolare",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "aggiorna i dati di un autore",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nazionalita\": \"Italiana\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/autori/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "autori",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "libro",
+      "item": [
+        {
+          "name": "ottieni tutta la lista dei libri",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/libri",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "libri"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ottieni i dettagli di un singolo libro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/libri/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "libri",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "aggiunge un libro",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"titolo\": \"Guerra e pace\",\r\n  \"isbn\": \"9788804123999\",\r\n  \"annoPubblicazione\": 1869,\r\n  \"prezzo\": 16.50,\r\n  \"disponibile\": true,\r\n  \"autoreId\": 1,\r\n  \"categoriaId\": 3\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/libri",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "libri"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modifica i dettagli di un libro",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"disponibile\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/libri/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "libri",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "elimina un libro",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:3000/libri/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "libri",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cerca un libro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/libri/search?q=straniero",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "libri",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "straniero"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cerca tutti i libri disponibili",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "cerca i libri di una categoriaspecifica",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/categorie/2/libri",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "categorie",
+                "2",
+                "libri"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ottieni tutte le categorie",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/categorie",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "categorie"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ottieni la categoria partendo da un id specifico",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "cerco un libro in base ad una determinata categoria",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/categorie/1/libri",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "categorie",
+            "1",
+            "libri"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "crea una nuova categoria",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Fantasy\",\r\n  \"descrizione\": \"Romanzi fantasy e magici\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/categorie",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "categorie"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "elimina una categoria(se non ci sono libri associati",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/categorie/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "categorie",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

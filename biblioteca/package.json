@@ -1,0 +1,18 @@
+{
+  "name": "biblioteca",
+  "version": "1.0.0",
+  "description": "esame IFTS",
+  "license": "ISC",
+  "author": "Giovanni Sechi",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "mysql2": "^3.22.5",
+    "mysql3": "^0.7.10",
+    "sequelize": "^6.37.8"
+  }
+}
