@@ -1,0 +1,29 @@
+Esame test/
+├── app.js
+├── server.js
+├── config/database.js
+├── models/
+│   ├── index.js
+│   ├── cliente.model.js
+│   ├── servizio.model.js
+│   └── prenotazione.model.js
+├── repository/
+│   ├── cliente.repository.js
+│   └── servizio.repository.js
+├── service/
+│   ├── cliente.service.js
+│   ├── servizio.service.js
+│   └── statistiche.service.js
+├── validator/
+│   ├── cliente.validator.js
+│   └── servizio.validator.js
+├── controller/
+│   ├── cliente.controller.js
+│   ├── servizio.controller.js
+│   └── statistiche.controller.js
+├── routes/
+│   ├── index.js
+│   ├── clienti.routes.js
+│   ├── servizi.routes.js
+│   └── statistiche.routes.js
+└── scripts/scripts.js

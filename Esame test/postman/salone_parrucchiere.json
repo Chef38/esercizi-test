@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "Salone di Parrucchiere API",
+    "description": "Collection di test per il backend REST del salone di parrucchiere. 6 endpoint GET organizzati in cartelle per tag (Clienti, Servizi, Statistiche).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Clienti",
+      "item": [
+        {
+          "name": "1 - Lista clienti (nomeCompleto concatenato)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clienti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clienti"]
+            },
+            "description": "Restituisce id, email, telefono, nomeCompleto (CONCAT) e dataIscrizioneFormattata (DATE_FORMAT)."
+          }
+        },
+        {
+          "name": "2 - Dettaglio cliente (età + servizi)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clienti/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clienti", "1"]
+            },
+            "description": "Restituisce il cliente con eta (TIMESTAMPDIFF) e la lista dei servizi svolti con dataAppuntamento e valutazione. 404 se non esiste."
+          }
+        },
+        {
+          "name": "2b - Dettaglio cliente inesistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clienti/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clienti", "9999"]
+            },
+            "description": "Deve restituire 404 con { errore: 'Cliente non trovato.' }."
+          }
+        },
+        {
+          "name": "3 - Ricerca clienti (?q=ross)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clienti/ricerca?q=ross",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clienti", "ricerca"],
+              "query": [
+                { "key": "q", "value": "ross" }
+              ]
+            },
+            "description": "Ricerca case-insensitive su nome OR cognome tramite LIKE. Restituisce nomeCompleto concatenato."
+          }
+        },
+        {
+          "name": "3b - Ricerca senza q (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clienti/ricerca",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clienti", "ricerca"]
+            },
+            "description": "Deve restituire 400 con { errore: \"Parametro di ricerca 'q' obbligatorio.\" }."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Servizi",
+      "item": [
+        {
+          "name": "4 - Lista servizi (durata + prezzo formattati)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servizi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "servizi"]
+            },
+            "description": "Restituisce id, nome, descrizione, durataFormattata (Xh Ymin) e prezzoFormattato (X.XX €)."
+          }
+        },
+        {
+          "name": "5 - Dettaglio servizio (COUNT + AVG)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servizi/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "servizi", "1"]
+            },
+            "description": "Restituisce il servizio con numeroPrenotazioni (COUNT), valutazioneMedia (ROUND(AVG,1)) e clienti che lo hanno prenotato. 404 se non esiste."
+          }
+        },
+        {
+          "name": "5b - Dettaglio servizio inesistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servizi/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "servizi", "9999"]
+            },
+            "description": "Deve restituire 404 con { errore: 'Servizio non trovato.' }."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Statistiche",
+      "item": [
+        {
+          "name": "6 - Classifica servizi popolari",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/statistiche/servizi-popolari",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "statistiche", "servizi-popolari"]
+            },
+            "description": "Classifica dei servizi ordinata per numeroPrenotazioni DESC, con COUNT, SUM(prezzo) come incassoTotale e ROUND(AVG(valutazione),1) come valutazioneMedia."
+          }
+        }
+      ]
+    }
+  ]
+}
