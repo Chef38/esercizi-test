@@ -24,6 +24,7 @@
  *  autore.getLibri()         → carica tutti i libri di un autore
  */
 
+// Importa l'istanza sequelize (connessione DB) e i tre modelli
 const sequelize = require('../config/database');
 const Categoria = require('./categoria.model');
 const Autore    = require('./autore.model');
@@ -34,11 +35,17 @@ const Libro     = require('./libri.model');
 // foreignKey: nome del campo JS sul modello Libro (categoriaId)
 // che Sequelize mappa alla colonna "categoria" nel DB (tramite `field`)
 
+// hasMany: "una categoria HA MOLTI libri"
+// Genera il metodo categoria.getLibri() sul modello Categoria
 Categoria.hasMany(Libro, {
-  foreignKey: 'categoriaId',
-  as:         'libri',
+  foreignKey: 'categoriaId', // il campo che collega i due modelli
+  as:         'libri',        // alias usato in include: [{ as: 'libri' }]
 });
 
+// belongsTo: "un libro APPARTIENE A una categoria"
+// Genera il metodo libro.getCategoria() sul modello Libro
+// Le due associazioni (hasMany + belongsTo) sono la stessa relazione
+// vista dai due lati: vanno SEMPRE dichiarate entrambe.
 Libro.belongsTo(Categoria, {
   foreignKey: 'categoriaId',
   as:         'categoria',
@@ -59,6 +66,8 @@ Libro.belongsTo(Autore, {
   as:         'autore',
 });
 
+// Esporta tutto in un unico oggetto: chi importa può fare
+// const { Libro, Autore } = require('./models')
 module.exports = {
   sequelize,
   Categoria,

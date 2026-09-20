@@ -3,17 +3,27 @@
  *
  * Eseguire dalla ROOT del progetto:
  *   node scripts/seed.js
+ *
+ * Inserisce dati di esempio nel DB usando findOrCreate:
+ * se i record esistono NON li duplica, quindi lo script è idempotente
+ * (può essere eseguito più volte senza problemi).
  */
 
+// path serve per costruire il percorso assoluto al file .env
 const path = require('path');
+// __dirname = cartella dello script; ../ risale alla root del progetto
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
+// Import di sequelize + modelli
 const { sequelize, Categoria, Autore, Libro } = require('../models');
 
 async function seed() {
+  // Sincronizza i modelli con il DB (crea tabelle se mancano, senza cancellare dati)
   await sequelize.sync({ force: false });
 
   // ── Categorie ────────────────────────────────────────
+  // findOrCreate: cerca in base a `where`, se non trova crea con `defaults`.
+  // Restituisce un array [istanza, creato?] → destrutturo solo l'istanza.
   const [poesia]    = await Categoria.findOrCreate({ where: { nome: 'Poesia'    }, defaults: { descrizione: 'Epica, lirica e poesia in versi' } });
   const [narrativa] = await Categoria.findOrCreate({ where: { nome: 'Narrativa' }, defaults: { descrizione: 'Romanzi e racconti di finzione' } });
   const [classici]  = await Categoria.findOrCreate({ where: { nome: 'Classici'  }, defaults: { descrizione: 'Grandi classici della letteratura mondiale' } });
@@ -56,6 +66,8 @@ async function seed() {
     { isbn: '9788804123469', defaults: { titolo: 'Cime tempestose',             annoPubblicazione: 1847, prezzo: 11.00, disponibile: true,  autoreId: bronte.id,      categoriaId: classici.id  } },
   ];
 
+  // Ciclo sui libri e li inserisce uno alla volta.
+  // Uso l'isbn come chiave di ricerca perché è UNIQUE nel DB.
   for (const { isbn, defaults } of libriData) {
     await Libro.findOrCreate({ where: { isbn }, defaults });
   }
@@ -64,10 +76,15 @@ async function seed() {
   console.log('   - 5  categorie');
   console.log('   - 14 autori');
   console.log('   - 14 libri');
+  // Termina il processo con exit code 0 (successo).
+  // Senza questa riga il processo resterebbe appeso alla connessione DB.
   process.exit(0);
 }
 
+// Esegue seed() e cattura eventuali errori.
+// .catch() è necessario perché una funzione async che throwa
+// senza un try/catch esterno lascia un'unhandled promise rejection.
 seed().catch(err => {
   console.error('❌ Errore seed:', err.message);
-  process.exit(1);
+  process.exit(1); // exit code 1 = errore
 });

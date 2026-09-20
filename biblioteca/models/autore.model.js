@@ -9,22 +9,27 @@
  *   annoNascita  INT(10)      NULL        ← camelCase nel DB
  */
 
+// DataTypes = tipi colonna; sequelize = connessione DB condivisa
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+// Definizione del modello Autore
 const Autore = sequelize.define('Autore', {
 
+  // Chiave primaria auto-incrementata
   id: {
     type:          DataTypes.INTEGER(10),
     primaryKey:    true,
     autoIncrement: true,
   },
 
+  // Nome dell'autore, obbligatorio
   nome: {
     type:      DataTypes.STRING(255),
     allowNull: false,
   },
 
+  // Cognome dell'autore, obbligatorio
   cognome: {
     type:      DataTypes.STRING(255),
     allowNull: false,
@@ -36,7 +41,10 @@ const Autore = sequelize.define('Autore', {
   nazionalita: {
     type:      DataTypes.STRING(255),
     allowNull: true,
-    field:     'nazionalità',  // nome REALE della colonna nel DB
+    // `field` è la CHIAVE: dice a Sequelize il nome VERO della colonna.
+    // In JS lavoro con autore.nazionalita (facile), nel DB legge/scrive
+    // la colonna "nazionalità" (con l'accento) senza rischiare bug.
+    field:     'nazionalità',
   },
 
   // Nel DB si chiama già annoNascita (camelCase) → nessun mapping necessario
@@ -46,8 +54,8 @@ const Autore = sequelize.define('Autore', {
   },
 
 }, {
-  tableName:  'autore',  // nome REALE della tabella
-  timestamps: false,
+  tableName:  'autore',  // nome REALE della tabella (senza plurale automatico)
+  timestamps: false,     // niente createdAt/updatedAt
 });
 
 module.exports = Autore;

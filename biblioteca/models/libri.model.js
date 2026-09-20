@@ -19,22 +19,27 @@
  * colonne FK dirette nella tabella libro.
  */
 
+// Import dei tipi Sequelize e della connessione condivisa
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+// Definizione del modello Libro
 const Libro = sequelize.define('Libro', {
 
+  // Chiave primaria auto-incrementata
   id: {
     type:          DataTypes.INTEGER(10),
     primaryKey:    true,
     autoIncrement: true,
   },
 
+  // Titolo del libro, obbligatorio
   titolo: {
     type:      DataTypes.STRING(300),
     allowNull: false,
   },
 
+  // ISBN: codice fisso di 13 caratteri, deve essere UNIVOCO
   isbn: {
     type:      DataTypes.CHAR(13),
     allowNull: false,
@@ -47,22 +52,25 @@ const Libro = sequelize.define('Libro', {
   annoPubblicazione: {
     type:         DataTypes.INTEGER(10),
     allowNull:    true,
-    defaultValue: 0,
-    field:        'annoPubblicazione', // nome esatto della colonna nel DB
+    defaultValue: 0,                     // se non specificato, va 0
+    field:        'annoPubblicazione',   // nome esatto della colonna nel DB
   },
 
+  // Prezzo in decimale, opzionale
   prezzo: {
     type:      DataTypes.FLOAT,
     allowNull: true,
   },
 
+  // Disponibilità: true/false in JS, salvato come TINYINT(1) nel DB
   disponibile: {
     type:         DataTypes.BOOLEAN, // Sequelize mappa BOOLEAN ↔ TINYINT(1)
     allowNull:    false,
-    defaultValue: true,
+    defaultValue: true,              // per default un libro è disponibile
   },
 
   // FK verso categoria — nome colonna nel DB: "categoria"
+  // In JS uso categoriaId (convenzione), nel DB la colonna si chiama "categoria"
   categoriaId: {
     type:      DataTypes.INTEGER(11),
     allowNull: true,
@@ -70,6 +78,7 @@ const Libro = sequelize.define('Libro', {
   },
 
   // FK verso autore — nome colonna nel DB: "autore"
+  // Stesso trucco: nome JS chiaro (autoreId), nome DB originale
   autoreId: {
     type:      DataTypes.INTEGER(11),
     allowNull: true,
@@ -77,9 +86,10 @@ const Libro = sequelize.define('Libro', {
   },
 
 }, {
-  tableName:   'libro',       
-  timestamps:  false,
-  underscored: false,        
+  tableName:   'libro',      // nome tabella
+  timestamps:  false,        // niente createdAt/updatedAt
+  underscored: false,        // NON convertire camelCase → snake_case
+                             // (i nomi delle colonne nel DB non sono snake_case)
 });
 
 module.exports = Libro;
