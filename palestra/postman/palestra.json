@@ -1,0 +1,263 @@
+{
+  "info": {
+    "name": "Palestra API",
+    "description": "Collection dei 15 endpoint del backend REST della Palestra (Sale, Iscritti, Corsi + interrogazioni avanzate).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "Sale",
+      "item": [
+        {
+          "name": "1 - GET /api/sale (lista sale)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sale",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sale"]
+            },
+            "description": "Restituisce l'elenco di tutte le sale."
+          }
+        },
+        {
+          "name": "2 - POST /api/sale (crea sala)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Sala Spinning\",\n  \"piano\": 1,\n  \"capienza\": 20\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sale",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sale"]
+            },
+            "description": "Crea una nuova sala. Campi obbligatori: nome, piano, capienza. 400 se mancanti; 201 con la sala creata in caso di successo."
+          }
+        },
+        {
+          "name": "3 - DELETE /api/sale/:id (elimina sala)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sale/5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sale", "5"]
+            },
+            "description": "Elimina una sala. 204 se OK. 404 se non esiste. 400 se ha corsi associati ('Impossibile eliminare: esistono corsi associati a questa sala.')."
+          }
+        },
+        {
+          "name": "15 - GET /api/sale/:id/corsi (corsi di una sala)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sale/1/corsi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sale", "1", "corsi"]
+            },
+            "description": "Tutti i corsi che si svolgono nella sala :id (con dettaglio iscritti). 404 se la sala non esiste."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Iscritti",
+      "item": [
+        {
+          "name": "4 - GET /api/iscritti (lista iscritti)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/iscritti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "iscritti"]
+            },
+            "description": "Restituisce l'elenco di tutti gli iscritti."
+          }
+        },
+        {
+          "name": "5 - POST /api/iscritti (crea iscritto)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Paolo\",\n  \"cognome\": \"Neri\",\n  \"email\": \"paolo.neri@email.it\",\n  \"dataNascita\": \"1994-06-21\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/iscritti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "iscritti"]
+            },
+            "description": "Crea un nuovo iscritto. Tutti i campi obbligatori. Email UNIQUE (400 in caso di duplicato)."
+          }
+        },
+        {
+          "name": "6 - GET /api/iscritti/:id (dettaglio + corsi)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/iscritti/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "iscritti", "1"]
+            },
+            "description": "Dettaglio dell'iscritto con la lista dei corsi frequentati (ognuno con la sua sala). 404 se non esiste."
+          }
+        },
+        {
+          "name": "7 - PUT /api/iscritti/:id (aggiorna)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"email\": \"mario.rossi.new@email.it\",\n  \"dataNascita\": \"1985-04-12\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/iscritti/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "iscritti", "1"]
+            },
+            "description": "Aggiorna un iscritto esistente. Solo i campi presenti nel body vengono aggiornati. 404 se non esiste."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Corsi",
+      "item": [
+        {
+          "name": "8 - GET /api/corsi (lista con sala e iscritti)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/corsi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "corsi"]
+            },
+            "description": "Lista di tutti i corsi con la sala associata e l'elenco degli iscritti."
+          }
+        },
+        {
+          "name": "9 - POST /api/corsi (crea corso + iscritti)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"HIIT\",\n  \"descrizione\": \"High Intensity Interval Training\",\n  \"livello\": \"avanzato\",\n  \"prezzoMensile\": 50.00,\n  \"postiMax\": 15,\n  \"SalaId\": 1,\n  \"iscrittiIds\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/corsi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "corsi"]
+            },
+            "description": "Crea un nuovo corso. Obbligatori: nome, livello, prezzoMensile, postiMax, SalaId. Opzionali: descrizione, iscrittiIds (array di id). 404 se sala o iscritti non esistono; 201 in caso di successo."
+          }
+        },
+        {
+          "name": "10 - GET /api/corsi/:id (dettaglio)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/corsi/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "corsi", "1"]
+            },
+            "description": "Dettaglio completo del corso: dati del corso, sala e iscritti. 404 se non esiste."
+          }
+        },
+        {
+          "name": "11 - PUT /api/corsi/:id (aggiorna)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prezzoMensile\": 42.50,\n  \"postiMax\": 18,\n  \"iscrittiIds\": [1, 2, 3, 4]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/corsi/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "corsi", "1"]
+            },
+            "description": "Modifica un corso esistente. Se iscrittiIds e' presente, sostituisce l'insieme completo degli iscritti."
+          }
+        },
+        {
+          "name": "12 - DELETE /api/corsi/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/corsi/11",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "corsi", "11"]
+            },
+            "description": "Elimina il corso dal catalogo (con le sue righe in CorsoIscritto). 204 se OK, 404 se non esiste."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ricerca",
+      "item": [
+        {
+          "name": "13 - GET /api/corsi/search?q=yoga",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/corsi/search?q=yoga",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "corsi", "search"],
+              "query": [
+                { "key": "q", "value": "yoga", "description": "Trova 'Yoga Mattina' e 'Yoga Sera' (LIKE case-insensitive)." }
+              ]
+            },
+            "description": "Ricerca corsi per nome (case-insensitive con LIKE). Se manca 'q' risponde 400 con: \"Parametro di ricerca 'q' obbligatorio.\"."
+          }
+        },
+        {
+          "name": "14 - GET /api/corsi/disponibili",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/corsi/disponibili",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "corsi", "disponibili"]
+            },
+            "description": "Lista dei corsi con posti disponibili (iscritti attuali < postiMax). Con il seed di default esclude Yoga Sera, CrossFit e Boxe (al completo)."
+          }
+        },
+        {
+          "name": "15 - GET /api/sale/:id/corsi (alias visibile qui)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sale/1/corsi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sale", "1", "corsi"]
+            },
+            "description": "Duplicato per comodita': l'endpoint 15 rientra tra le interrogazioni avanzate ma la sua route sta sotto /api/sale/:id/corsi."
+          }
+        }
+      ]
+    }
+  ]
+}
