@@ -1,0 +1,126 @@
+### ============================================================
+### TEST ENDPOINT BIBLIOTECA
+### Richiede l'estensione "REST Client" di VS Code.
+### Cliccare "Send Request" sopra ogni ###.
+### ============================================================
+
+@baseUrl = http://localhost:3000/api
+
+### 1. Root — verifica che il server risponde
+GET http://localhost:3000/
+
+
+### ─── CATEGORIE ────────────────────────────────────────────────
+
+### 2. GET tutte le categorie
+GET {{baseUrl}}/categorie
+
+### 3. POST nuova categoria
+POST {{baseUrl}}/categorie
+Content-Type: application/json
+
+{
+  "nome": "Fantasy",
+  "descrizione": "Romanzi fantastici"
+}
+
+### 4. GET categoria per id
+GET {{baseUrl}}/categorie/1
+
+### 5. PUT aggiorna categoria
+PUT {{baseUrl}}/categorie/1
+Content-Type: application/json
+
+{ "descrizione": "Poesia epica, lirica e in versi (aggiornata)" }
+
+### 6. DELETE categoria SENZA libri (dovrebbe funzionare)
+DELETE {{baseUrl}}/categorie/99
+
+### 7. DELETE categoria CON libri → deve dare 400 con messaggio
+DELETE {{baseUrl}}/categorie/1
+
+### 8. GET libri di una categoria
+GET {{baseUrl}}/categorie/1/libri
+
+
+### ─── AUTORI ───────────────────────────────────────────────────
+
+### 9. GET tutti gli autori (con i loro libri)
+GET {{baseUrl}}/autori
+
+### 10. POST nuovo autore
+POST {{baseUrl}}/autori
+Content-Type: application/json
+
+{
+  "nome": "Umberto",
+  "cognome": "Eco",
+  "nazionalita": "Italiana",
+  "annoNascita": 1932
+}
+
+### 11. GET autore per id
+GET {{baseUrl}}/autori/1
+
+### 12. PUT aggiorna autore
+PUT {{baseUrl}}/autori/1
+Content-Type: application/json
+
+{ "nazionalita": "Greca antica (aggiornato)" }
+
+
+### ─── LIBRI ────────────────────────────────────────────────────
+
+### 13. GET tutti i libri (con categoria + autori)
+GET {{baseUrl}}/libri
+
+### 14. GET libro per id
+GET {{baseUrl}}/libri/1
+
+### 15. POST nuovo libro con PIÙ autori (many-to-many!)
+POST {{baseUrl}}/libri
+Content-Type: application/json
+
+{
+  "titolo": "Il nome della rosa",
+  "isbn": "9788845292613",
+  "annoPubblicazione": 1980,
+  "prezzo": 15.00,
+  "disponibile": true,
+  "categoriaId": 3,
+  "autori_ids": [1, 2]
+}
+
+### 16. POST libro con autore inesistente → deve dare 404
+POST {{baseUrl}}/libri
+Content-Type: application/json
+
+{
+  "titolo": "Libro test",
+  "isbn": "0000000000001",
+  "autori_ids": [9999]
+}
+
+### 17. PUT aggiorna libro (cambia autori)
+PUT {{baseUrl}}/libri/1
+Content-Type: application/json
+
+{
+  "prezzo": 12.90,
+  "autori_ids": [1, 3]
+}
+
+### 18. DELETE libro
+DELETE {{baseUrl}}/libri/15
+
+
+### ─── RICERCHE ─────────────────────────────────────────────────
+
+### 19. GET libri disponibili
+GET {{baseUrl}}/libri/disponibili
+
+### 20. GET ricerca titolo (case-insensitive!)
+GET {{baseUrl}}/libri/search?q=ODISSEA
+
+### 21. GET ricerca senza "q" → deve dare 422
+GET {{baseUrl}}/libri/search

@@ -8,6 +8,14 @@
  * Sequelize è un ORM: permette di lavorare con oggetti JS invece
  * di scrivere SQL a mano. Qui si crea l'istanza CONDIVISA che
  * verrà usata da tutti i modelli.
+ *
+ * ═══════════════════════════════════════════════════════════════
+ *  ✅ TODO ESAME — checklist:
+ *   [ ] new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {...})
+ *   [ ] host, port, dialect ('mysql' funziona anche per MariaDB)
+ *   [ ] define.timestamps: false (se non richiesto)
+ *   [ ] Esporta l'ISTANZA (non la classe)
+ * ═══════════════════════════════════════════════════════════════
  */
 
 // Importa la classe Sequelize dal pacchetto sequelize

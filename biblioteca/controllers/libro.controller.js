@@ -5,6 +5,19 @@
  * Rispetto agli altri controller ha DUE endpoint aggiuntivi:
  *   - search       (ricerca per titolo)
  *   - getDisponibili (filtro sui libri con disponibile=true)
+ *
+ * ═══════════════════════════════════════════════════════════════
+ *  ✅ TODO ESAME — CONTROLLER (adattatore HTTP):
+ *   [ ] Import service + validator
+ *   [ ] Ogni handler è async (req, res) => { ... }
+ *   [ ] parseInt(req.params.id) SEMPRE
+ *   [ ] req.query.xxx per query string (?q=...)
+ *   [ ] req.body per POST/PUT
+ *   [ ] validaCreazione/validaAggiornamento → 422 se errori
+ *   [ ] try/catch con err.status || 500
+ *   [ ] Status: 200 default, 201 create, 204 delete, 422 validazione
+ *   [ ] module.exports = oggetto con tutti gli handler
+ * ═══════════════════════════════════════════════════════════════
  */
 
 const service   = require('../service/libro.service');

@@ -1,17 +1,34 @@
 /**
  * repository/libroRepository.js
  * Solo query Sequelize — nessuna logica di business.
+ *
+ * ═══════════════════════════════════════════════════════════════
+ *  ✅ TODO ESAME — REPOSITORY (query pure):
+ *   [ ] Import { Op } se ti serve LIKE, gt, lt, in, ecc.
+ *   [ ] Import modelli da ../models (mai da ./nome.model direttamente!)
+ *   [ ] Definisci INCLUDE_XXX come costante per riuso
+ *   [ ] Metodi minimi: findAll, findById, findByIdSemplice,
+ *       create, save, delete
+ *   [ ] Se serve dopo update: reload(istanza, { include })
+ *   [ ] NIENTE if/throw qui: solo query!
+ * ═══════════════════════════════════════════════════════════════
  */
 
 // Op contiene gli operatori Sequelize (like, gt, in, ecc.)
 const { Op } = require('sequelize');
 const { Libro, Autore, Categoria } = require('../models');
 
-// Include standard: per ogni libro carica autore e categoria
-// Riutilizzato in quasi tutte le query per non ripetere l'oggetto include
+// Include standard: per ogni libro carica categoria e ARRAY di autori
+// (many-to-many tramite libro_autore).
+// `through: { attributes: [] }` = non includere le colonne della pivot
+// nella risposta JSON (id_libro, id_autore) → output più pulito.
 const INCLUDE_COMPLETO = [
-  { model: Categoria, as: 'categoria' }, // JOIN con la categoria
-  { model: Autore,    as: 'autore'    }, // JOIN con l'autore
+  { model: Categoria, as: 'categoria' },
+  {
+    model: Autore,
+    as:    'autori',
+    through: { attributes: [] },
+  },
 ];
 
 const libroRepository = {
@@ -47,10 +64,21 @@ const libroRepository = {
     include: INCLUDE_COMPLETO,
   }),
 
-  /** SELECT * FROM libro WHERE autoreId = ? + JOIN */
+  /** Libri di uno specifico autore (many-to-many via libro_autore) */
+  // Con belongsToMany serve un include filtrato sull'autore: required:true
+  // forza l'INNER JOIN, così esce solo il sottoinsieme di libri legati
+  // a quell'autoreId nella tabella pivot.
   findByAutore: (autoreId) => Libro.findAll({
-    where:   { autoreId },
-    include: INCLUDE_COMPLETO,
+    include: [
+      { model: Categoria, as: 'categoria' },
+      {
+        model:    Autore,
+        as:       'autori',
+        through:  { attributes: [] },
+        where:    { id: autoreId },
+        required: true, // INNER JOIN
+      },
+    ],
   }),
 
   /** INSERT INTO libro ... */

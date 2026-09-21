@@ -49,27 +49,32 @@ async function seed() {
   const [bronte]      = await Autore.findOrCreate({ where: { nome: 'Emily',      cognome: 'Brontë'      }, defaults: { nazionalita: 'Britannica',   annoNascita: 1818 } });
 
   // ── Libri ─────────────────────────────────────────────
+  // Ora la relazione libro↔autore è many-to-many:
+  // ogni libro può avere PIÙ autori (vedi ultimo esempio, Moby Dick,
+  // che qui associo a Melville + Brontë solo per mostrare il caso multiplo).
   const libriData = [
-    { isbn: '9788804123456', defaults: { titolo: "L'Odissea",                   annoPubblicazione: -800, prezzo: 9.90,  disponibile: true,  autoreId: omero.id,       categoriaId: poesia.id    } },
-    { isbn: '9788804123457', defaults: { titolo: "L'Eneide",                    annoPubblicazione: -19,  prezzo: 9.90,  disponibile: true,  autoreId: virgilio.id,    categoriaId: poesia.id    } },
-    { isbn: '9788804123458', defaults: { titolo: 'Faust',                       annoPubblicazione: 1808, prezzo: 12.50, disponibile: true,  autoreId: goethe.id,      categoriaId: classici.id  } },
-    { isbn: '9788804123459', defaults: { titolo: 'La Divina Commedia',          annoPubblicazione: 1320, prezzo: 14.00, disponibile: true,  autoreId: dante.id,       categoriaId: poesia.id    } },
-    { isbn: '9788804123460', defaults: { titolo: 'Demian',                      annoPubblicazione: 1919, prezzo: 10.00, disponibile: true,  autoreId: hesse.id,       categoriaId: filosofia.id } },
-    { isbn: '9788804123461', defaults: { titolo: 'Lo straniero',                annoPubblicazione: 1942, prezzo: 11.00, disponibile: true,  autoreId: camus.id,       categoriaId: filosofia.id } },
-    { isbn: '9788804123462', defaults: { titolo: 'Don Chisciotte',              annoPubblicazione: 1605, prezzo: 15.00, disponibile: true,  autoreId: cervantes.id,   categoriaId: classici.id  } },
-    { isbn: '9788804123463', defaults: { titolo: "La scena dell'inferno",       annoPubblicazione: 1948, prezzo: 11.50, disponibile: false, autoreId: akutagawa.id,   categoriaId: narrativa.id } },
-    { isbn: '9788804123464', defaults: { titolo: 'Il sogno della camera rossa', annoPubblicazione: 1791, prezzo: 18.00, disponibile: true,  autoreId: caoxueqin.id,   categoriaId: classici.id  } },
-    { isbn: '9788804123465', defaults: { titolo: 'Delitto e castigo',           annoPubblicazione: 1866, prezzo: 13.00, disponibile: true,  autoreId: dostoevskij.id, categoriaId: classici.id  } },
-    { isbn: '9788804123466', defaults: { titolo: 'La metamorfosi',              annoPubblicazione: 1915, prezzo: 8.90,  disponibile: true,  autoreId: kafka.id,       categoriaId: narrativa.id } },
-    { isbn: '9788804123467', defaults: { titolo: 'Le ali',                      annoPubblicazione: 1936, prezzo: 10.50, disponibile: false, autoreId: yisang.id,      categoriaId: narrativa.id } },
-    { isbn: '9788804123468', defaults: { titolo: 'Moby Dick',                   annoPubblicazione: 1851, prezzo: 14.00, disponibile: true,  autoreId: melville.id,    categoriaId: avventura.id } },
-    { isbn: '9788804123469', defaults: { titolo: 'Cime tempestose',             annoPubblicazione: 1847, prezzo: 11.00, disponibile: true,  autoreId: bronte.id,      categoriaId: classici.id  } },
+    { isbn: '9788804123456', autori_ids: [omero.id],       defaults: { titolo: "L'Odissea",                   annoPubblicazione: -800, prezzo: 9.90,  disponibile: true,  categoriaId: poesia.id    } },
+    { isbn: '9788804123457', autori_ids: [virgilio.id],    defaults: { titolo: "L'Eneide",                    annoPubblicazione: -19,  prezzo: 9.90,  disponibile: true,  categoriaId: poesia.id    } },
+    { isbn: '9788804123458', autori_ids: [goethe.id],      defaults: { titolo: 'Faust',                       annoPubblicazione: 1808, prezzo: 12.50, disponibile: true,  categoriaId: classici.id  } },
+    { isbn: '9788804123459', autori_ids: [dante.id],       defaults: { titolo: 'La Divina Commedia',          annoPubblicazione: 1320, prezzo: 14.00, disponibile: true,  categoriaId: poesia.id    } },
+    { isbn: '9788804123460', autori_ids: [hesse.id],       defaults: { titolo: 'Demian',                      annoPubblicazione: 1919, prezzo: 10.00, disponibile: true,  categoriaId: filosofia.id } },
+    { isbn: '9788804123461', autori_ids: [camus.id],       defaults: { titolo: 'Lo straniero',                annoPubblicazione: 1942, prezzo: 11.00, disponibile: true,  categoriaId: filosofia.id } },
+    { isbn: '9788804123462', autori_ids: [cervantes.id],   defaults: { titolo: 'Don Chisciotte',              annoPubblicazione: 1605, prezzo: 15.00, disponibile: true,  categoriaId: classici.id  } },
+    { isbn: '9788804123463', autori_ids: [akutagawa.id],   defaults: { titolo: "La scena dell'inferno",       annoPubblicazione: 1948, prezzo: 11.50, disponibile: false, categoriaId: narrativa.id } },
+    { isbn: '9788804123464', autori_ids: [caoxueqin.id],   defaults: { titolo: 'Il sogno della camera rossa', annoPubblicazione: 1791, prezzo: 18.00, disponibile: true,  categoriaId: classici.id  } },
+    { isbn: '9788804123465', autori_ids: [dostoevskij.id], defaults: { titolo: 'Delitto e castigo',           annoPubblicazione: 1866, prezzo: 13.00, disponibile: true,  categoriaId: classici.id  } },
+    { isbn: '9788804123466', autori_ids: [kafka.id],       defaults: { titolo: 'La metamorfosi',              annoPubblicazione: 1915, prezzo: 8.90,  disponibile: true,  categoriaId: narrativa.id } },
+    { isbn: '9788804123467', autori_ids: [yisang.id],      defaults: { titolo: 'Le ali',                      annoPubblicazione: 1936, prezzo: 10.50, disponibile: false, categoriaId: narrativa.id } },
+    { isbn: '9788804123468', autori_ids: [melville.id],    defaults: { titolo: 'Moby Dick',                   annoPubblicazione: 1851, prezzo: 14.00, disponibile: true,  categoriaId: avventura.id } },
+    { isbn: '9788804123469', autori_ids: [bronte.id],      defaults: { titolo: 'Cime tempestose',             annoPubblicazione: 1847, prezzo: 11.00, disponibile: true,  categoriaId: classici.id  } },
   ];
 
-  // Ciclo sui libri e li inserisce uno alla volta.
-  // Uso l'isbn come chiave di ricerca perché è UNIQUE nel DB.
-  for (const { isbn, defaults } of libriData) {
-    await Libro.findOrCreate({ where: { isbn }, defaults });
+  // Ciclo sui libri: findOrCreate + poi setAutori per popolare la pivot.
+  // setAutori(ids) è generato da belongsToMany: riscrive la tabella
+  // libro_autore con esattamente gli id passati.
+  for (const { isbn, autori_ids, defaults } of libriData) {
+    const [libro] = await Libro.findOrCreate({ where: { isbn }, defaults });
+    await libro.setAutori(autori_ids);
   }
 
   console.log('✅ Database popolato:');

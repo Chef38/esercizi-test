@@ -7,6 +7,15 @@
  * Qui si configurano SOLO middleware, route ed error handler.
  * L'avvio del server (listen) è invece in server.js: così si può
  * importare `app` nei test senza avviare la porta.
+ *
+ * ═══════════════════════════════════════════════════════════════
+ *  ✅ TODO ESAME — cosa NON dimenticare in questo file:
+ *   [ ] app.use(express.json())  → senza, req.body è undefined
+ *   [ ] require('./routes')(app) → monta tutte le routes
+ *   [ ] Error handler a 4 parametri (err, req, res, next)
+ *   [ ] module.exports = app
+ *   [ ] (Se richiesto) app.use(cors())  → npm i cors prima
+ * ═══════════════════════════════════════════════════════════════
  */
 
 // Importa il framework Express e crea un'istanza dell'applicazione

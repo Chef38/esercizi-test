@@ -8,6 +8,15 @@
  *
  * Esempio: se /:id fosse prima, la richiesta /libri/search
  * finirebbe in getById con req.params.id === "search" → errore.
+ *
+ * ═══════════════════════════════════════════════════════════════
+ *  ✅ TODO ESAME — ROUTES:
+ *   [ ] express.Router()
+ *   [ ] Route STATICHE (/search, /disponibili) PRIMA di /:id
+ *   [ ] router.get/post/put/delete(path, controller.metodo)
+ *   [ ] module.exports = router
+ *   [ ] Montare in routes/index.js con app.use('/api/xxx', router)
+ * ═══════════════════════════════════════════════════════════════
  */
 
 const express    = require('express');

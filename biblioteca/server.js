@@ -8,6 +8,16 @@
  * Questo è il PUNTO DI INGRESSO dell'applicazione.
  * Si occupa di: caricare le variabili d'ambiente, testare la connessione
  * al database, sincronizzare i modelli e avviare il server HTTP.
+ *
+ * ═══════════════════════════════════════════════════════════════
+ *  ✅ TODO ESAME — cosa NON dimenticare in questo file:
+ *   [ ] require('dotenv').config()  DEVE stare in cima
+ *   [ ] Import di app e di sequelize (da ./models, NON da ./config)
+ *   [ ] await sequelize.authenticate()  → verifica connessione
+ *   [ ] await sequelize.sync({ force: false })  → mai true!
+ *   [ ] app.listen(PORT, callback)
+ *   [ ] try/catch con process.exit(1) su errore
+ * ═══════════════════════════════════════════════════════════════
  */
 
 // Carica le variabili definite in .env dentro process.env.
