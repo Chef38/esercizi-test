@@ -1,0 +1,115 @@
+{
+  "info": {
+    "name": "Salone di Parrucchiere API",
+    "description": "Collection dei 6 endpoint di sola lettura del backend Salone di Parrucchiere.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Clienti",
+      "item": [
+        {
+          "name": "1 - Lista clienti",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clienti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clienti"]
+            },
+            "description": "Lista clienti con nomeCompleto (CONCAT) e dataIscrizioneFormattata (DATE_FORMAT)."
+          }
+        },
+        {
+          "name": "3 - Ricerca clienti (?q=ross)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clienti/ricerca?q=ross",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clienti", "ricerca"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "ross",
+                  "description": "Trova sia 'Rossi' che 'Rossetti' (LIKE case-insensitive)."
+                }
+              ]
+            },
+            "description": "Ricerca per nome o cognome. Senza 'q' risponde 400."
+          }
+        },
+        {
+          "name": "2 - Dettaglio cliente (:id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clienti/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clienti", "1"]
+            },
+            "description": "Dettaglio cliente con eta (TIMESTAMPDIFF) e servizi svolti. Id inesistente => 404."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Servizi",
+      "item": [
+        {
+          "name": "4 - Lista servizi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servizi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "servizi"]
+            },
+            "description": "Lista servizi con durataFormattata (FLOOR/MOD) e prezzoFormattato (FORMAT/CONCAT)."
+          }
+        },
+        {
+          "name": "5 - Dettaglio servizio (:id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servizi/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "servizi", "1"]
+            },
+            "description": "Dettaglio servizio con numeroPrenotazioni (COUNT), valutazioneMedia (AVG+ROUND) e clienti. Id inesistente => 404."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Statistiche",
+      "item": [
+        {
+          "name": "6 - Servizi popolari",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/statistiche/servizi-popolari",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "statistiche", "servizi-popolari"]
+            },
+            "description": "Classifica servizi per numeroPrenotazioni (COUNT), incassoTotale (SUM) e valutazioneMedia (AVG)."
+          }
+        }
+      ]
+    }
+  ]
+}
