@@ -1,466 +1,183 @@
-# APPUNTI ESAME — Biblioteca REST API (JavaScript version)
+# Note per l'esame — memo pratico
 
-> Traccia originale: `Esercizio_FastAPI_Biblioteca.docx` (Python/FastAPI).
-> **Concessione del docente**: prova in **JavaScript** (Node/Express/Sequelize).
-> Il progetto `biblioteca` in questa cartella è **95% pronto**, servono solo
-> modifiche puntuali per allinearlo alla traccia.
+File di studio personale, **non fa parte della consegna**.
+Rileggerlo prima della prova e tenerlo aperto durante lo svolgimento.
 
----
-
-## 🎯 STATO DEL PROGETTO ATTUALE VS. TRACCIA
-
-| Aspetto | Traccia | Progetto attuale | Da fare |
-|---|---|---|---|
-| Endpoint categorie | 3 | 3 (+1 PUT extra) | ⚠️ *decidere* se tenere il PUT |
-| Endpoint autori | 4 | 5 (con DELETE) | ⚠️ *decidere* se togliere DELETE |
-| Endpoint libri CRUD | 5 | 5 | ✅ OK |
-| Endpoint ricerche | 3 | 3 | ✅ OK |
-| **Relazione Libro↔Autore** | **Molti-a-molti** | Molti-a-uno | ❌ **DA CAMBIARE** |
-| Tabella associativa | `libro_autore` | Nessuna | ❌ **DA CREARE** |
-| POST /libri con `autori_ids: []` | Sì | No (un solo `autoreId`) | ❌ **DA MODIFICARE** |
-| GET /libri/search case-insensitive | Sì | Sì (`Op.like`) | ✅ OK (MySQL default) |
-| DELETE /categorie se ha libri → 400 | Sì | Sì | ✅ OK |
-| Nomi colonne | snake_case | camelCase con `field` | ✅ OK (JS può differire) |
-
-**Traduzione**: la modifica principale è la relazione **molti-a-molti**. Il resto è cosmetico.
+Progetto di riferimento: **biblioteca** (Node/Express/Sequelize/MariaDB).
+Traccia originale: FastAPI/Python, versione JavaScript autorizzata dal docente.
 
 ---
 
-## 1. GLI ENDPOINT DELLA TRACCIA (15 esatti)
+## 1. Prima di scrivere una riga di codice
 
-### Categorie (3)
-| # | Metodo | URL | Stato progetto |
-|---|---|---|---|
-| 1 | GET | `/categorie` | ✅ presente |
-| 2 | POST | `/categorie` | ✅ presente |
-| 3 | DELETE | `/categorie/{id}` (solo se senza libri, 400 sennò) | ✅ presente |
-
-> Il progetto ha in più: `GET /categorie/:id` e `PUT /categorie/:id`.
-> Non è un problema (endpoint in più non tolgono punti), ma **puoi lasciarli
-> o rimuoverli** per aderire ai 15 esatti.
-
-### Autori (4)
-| # | Metodo | URL | Stato progetto |
-|---|---|---|---|
-| 4 | GET | `/autori` | ✅ presente |
-| 5 | POST | `/autori` | ✅ presente |
-| 6 | GET | `/autori/{id}` con lista libri | ✅ presente (repo fa già il JOIN) |
-| 7 | PUT | `/autori/{id}` | ✅ presente |
-
-> Il progetto ha in più: `DELETE /autori/:id`. Puoi lasciarlo o toglierlo.
-
-### Libri CRUD (5)
-| # | Metodo | URL | Stato progetto |
-|---|---|---|---|
-| 8 | GET | `/libri` (con categoria + autori) | ⚠️ presente, ma restituisce UN autore |
-| 9 | POST | `/libri` (con `autori_ids: []`) | ❌ da rifare per M2M |
-| 10 | GET | `/libri/{id}` (dettaglio) | ⚠️ come sopra |
-| 11 | PUT | `/libri/{id}` | ⚠️ da adattare per M2M |
-| 12 | DELETE | `/libri/{id}` | ✅ presente |
-
-### Ricerche (3)
-| # | Metodo | URL | Stato progetto |
-|---|---|---|---|
-| 13 | GET | `/libri/search?q=...` case-insensitive | ✅ presente |
-| 14 | GET | `/libri/disponibili` | ✅ presente |
-| 15 | GET | `/categorie/{id}/libri` | ✅ presente |
+- Leggere **tutta** la traccia due volte.
+- Sottolineare/segnare:
+  - Numero esatto di endpoint richiesti (la traccia biblioteca ne chiede **15**).
+  - Le **entità** e le **cardinalità** (biblioteca: Categoria→Libro molti-a-uno, Libro↔Autore **molti-a-molti**).
+  - **Messaggi di errore letterali** (es. "Impossibile eliminare: esistono libri associati a questa categoria.", "Uno o più autori non esistono.") — vanno copiati carattere per carattere, punto e maiuscole comprese.
+  - Codici HTTP richiesti (200 / 201 / 204 / 400 / 404 / 422).
+  - Se la tabella pivot ha attributi propri o è pivot pura (biblioteca: pura, solo `id_libro` + `id_autore`).
+  - Tipi dei campi (INTEGER vs FLOAT, BOOLEAN default true).
+- Disegnare su carta il diagramma ER prima di aprire il codice.
 
 ---
 
-## 2. LA MODIFICA CHIAVE: MOLTI-A-MOLTI
+## 2. Workflow: come riusare i vecchi esercizi
 
-### 2.1 Schema DB da adottare
+1. **Copiare** una cartella di esercizio già funzionante (`biblioteca` è quella di riferimento) e rinominarla — mai partire da zero.
+2. Modificare **un livello per volta**, testando dopo ognuno:
+   1. `.env` → nome DB nuovo, utente e password del proprio ambiente.
+   2. Creare il DB vuoto in HeidiSQL: `CREATE DATABASE nome CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`
+   3. `models/` (una tabella = un file) + `models/index.js` per le associazioni.
+   4. `server.js` con `sync({ force: true })` la **prima volta** per creare tabelle e pivot.
+   5. `npm start`. Deve stampare "✅ Connessione al database riuscita." Se non parte qui, il problema è nei modelli o nella connessione, **non nelle rotte**.
+   6. Rimettere `sync({ force: false })` per non perdere i dati.
+   7. `node scripts/scripts.js` per popolare il DB.
+   8. `routes/` + `controllers/` **una risorsa alla volta**, testando ogni endpoint da `test.http` o Postman **prima** di passare alla successiva.
+3. **File `test.http`** già pronto → modificarlo, non farlo da zero. Cambiare solo body e ids.
 
-Attualmente `libro.autore` è una **FK diretta**. Devi:
+---
 
-1. **Rimuovere** la colonna `autore` dalla tabella `libro`
-2. **Creare** una tabella associativa `libro_autore`:
-   ```sql
-   CREATE TABLE libro_autore (
-     id_libro  INT NOT NULL,
-     id_autore INT NOT NULL,
-     PRIMARY KEY (id_libro, id_autore),
-     FOREIGN KEY (id_libro)  REFERENCES libro(id),
-     FOREIGN KEY (id_autore) REFERENCES autore(id)
-   );
-   ```
+## 3. Trappole classiche (le più costose)
 
-### 2.2 Modifiche a `models/libri.model.js`
-
-Rimuovi il campo `autoreId`:
+### Ordine delle rotte
+Rotte statiche (`/search`, `/disponibili`) **sempre prima** di `/:id`, altrimenti Express intercetta il segmento statico come valore del parametro.
 
 ```js
-// PRIMA (da cancellare):
-autoreId: {
-  type:      DataTypes.INTEGER(11),
-  allowNull: true,
-  field:     'autore',
-},
-
-// DOPO: niente autoreId nel modello Libro.
+router.get('/search',      controller.search);        // OK, prima di /:id
+router.get('/disponibili', controller.getDisponibili); // OK, prima di /:id
+router.get('/:id',         controller.getById);       // OK, per ultimo
 ```
 
-### 2.3 Nuovo modello `models/libro_autore.model.js`
+### Relazione many-to-many con pivot pura
+Basta il modello della pivot con le due FK come PK composta. Le associazioni si dichiarano con `belongsToMany` sui **due lati** con `through`:
 
 ```js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-
-// Tabella pivot senza attributi extra: Sequelize la gestisce
-// automaticamente tramite belongsToMany + through.
-const LibroAutore = sequelize.define('LibroAutore', {
-  id_libro:  { type: DataTypes.INTEGER, primaryKey: true },
-  id_autore: { type: DataTypes.INTEGER, primaryKey: true },
-}, {
-  tableName:  'libro_autore',
-  timestamps: false,
-});
-
-module.exports = LibroAutore;
+Libro.belongsToMany(Autore,  { through: LibroAutore, foreignKey: 'id_libro',  otherKey: 'id_autore', as: 'autori' });
+Autore.belongsToMany(Libro,  { through: LibroAutore, foreignKey: 'id_autore', otherKey: 'id_libro',  as: 'libri'  });
 ```
 
-### 2.4 Modifica `models/index.js` — associazioni
+Sequelize genera in automatico i metodi `libro.setAutori([...])`, `libro.addAutore(id)`, `libro.getAutori()`. Nel `create`/`update` del service uso `libro.setAutori(autori_ids)` per popolare la pivot in un colpo solo.
 
+### `through: { attributes: [] }`
+Negli include, senza questa riga il JSON di risposta contiene anche le colonne della pivot (`id_libro`, `id_autore`) ripetute in ogni autore/libro. Sporca l'output. Sempre presente in `INCLUDE_COMPLETO`.
+
+### `field: 'nome_reale'` per colonne con nomi diversi
+Nel modello Autore la colonna DB si chiama `nazionalità` (con accento) → in JS uso `nazionalita` con `field: 'nazionalità'`. Trucco fondamentale se lo schema DB non è camelCase.
+
+### Ordine in `server.js`
+`require('dotenv').config()` DEVE essere la **prima riga**, altrimenti `config/database.js` legge `process.env` vuoti e la connessione fallisce con "Access denied" o "unknown database".
+
+### `Op.like`
+MariaDB con collation `utf8mb4_general_ci` è già case-insensitive di default. `where: { titolo: { [Op.like]: `%${q}%` } }` funziona senza bisogno di `LOWER()`. Verificare la collation del proprio DB.
+
+### 404 vs 400 vs 422
+- **404** = risorsa cercata non esiste (id inesistente, autore in `autori_ids` che non c'è).
+- **400** = regola di business violata (delete categoria che ha libri).
+- **422** = dati in ingresso malformati (titolo mancante, `autori_ids` non è un array).
+Non confonderli — al prof piace vedere la distinzione netta.
+
+### Whitelist campi negli update
+Nel service:
 ```js
-const sequelize   = require('../config/database');
-const Categoria   = require('./categoria.model');
-const Autore      = require('./autore.model');
-const Libro       = require('./libri.model');
-const LibroAutore = require('./libro_autore.model');
-
-// 1-a-molti: Categoria → Libro (invariato)
-Categoria.hasMany(Libro,   { foreignKey: 'categoriaId', as: 'libri' });
-Libro.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
-
-// ★★★ MOLTI-A-MOLTI: Libro ↔ Autore tramite libro_autore ★★★
-Libro.belongsToMany(Autore, {
-  through:    LibroAutore,
-  foreignKey: 'id_libro',
-  otherKey:   'id_autore',
-  as:         'autori',   // libro.autori (array!)
-});
-Autore.belongsToMany(Libro, {
-  through:    LibroAutore,
-  foreignKey: 'id_autore',
-  otherKey:   'id_libro',
-  as:         'libri',    // autore.libri (array!)
-});
-
-module.exports = { sequelize, Categoria, Autore, Libro, LibroAutore };
+const campiAmmessi = ['titolo', 'isbn', 'annoPubblicazione', 'prezzo', 'disponibile', 'categoriaId'];
+campiAmmessi.forEach(c => { if (datiNuovi[c] !== undefined) libro[c] = datiNuovi[c]; });
 ```
+Serve a evitare **mass-assignment**: se il client manda `{"id": 999}` non deve poter cambiare l'id.
 
-### 2.5 Aggiorna `repository/libro.repository.js`
+### `reload()` dopo create/update
+Dopo `libroRepo.create()` e `libro.setAutori()`, l'istanza in memoria non ha le relazioni popolate. Il `reload({ include: INCLUDE_COMPLETO })` rifà una SELECT con JOIN e restituisce l'oggetto completo. Senza `reload` il client riceverebbe un libro senza `categoria` e senza `autori`.
 
-L'`INCLUDE_COMPLETO` deve caricare gli **autori** (array), non un singolo autore:
-
+### Autori inesistenti in `autori_ids` → 404
+La traccia (§5, endpoint 9) impone: "se uno degli ID autori non esiste, restituire HTTP 404". Nel service:
 ```js
-const INCLUDE_COMPLETO = [
-  { model: Categoria, as: 'categoria' },
-  {
-    model: Autore,
-    as:    'autori',
-    through: { attributes: [] }, // non includere i campi della pivot
-  },
-];
+const autori = await autoreRepo.findByIds(autori_ids);
+if (autori.length !== autori_ids.length) throw { status: 404, message: 'Uno o più autori non esistono.' };
 ```
 
-### 2.6 Aggiorna `service/libro.service.js` — create e update
-
-```js
-// CREATE
-create: async ({ titolo, isbn, annoPubblicazione, prezzo, disponibile, categoriaId, autori_ids = [] }) => {
-  // Verifica che categoria esista
-  if (categoriaId) {
-    const cat = await categoriaRepo.findById(categoriaId);
-    if (!cat) throw { status: 404, message: `Categoria con id=${categoriaId} non trovata.` };
-  }
-
-  // Verifica che TUTTI gli autori esistano
-  if (autori_ids.length > 0) {
-    const autori = await Autore.findAll({ where: { id: autori_ids } });
-    if (autori.length !== autori_ids.length) {
-      throw { status: 404, message: 'Uno o più autori non esistono.' };
-    }
-  }
-
-  // Crea il libro
-  const libro = await libroRepo.create({
-    titolo, isbn, annoPubblicazione, prezzo,
-    disponibile: disponibile !== undefined ? disponibile : true,
-    categoriaId,
-  });
-
-  // Collega gli autori tramite la tabella pivot
-  if (autori_ids.length > 0) {
-    await libro.setAutori(autori_ids); // metodo generato da belongsToMany
-  }
-
-  return libroRepo.reload(libro);
-},
-
-// UPDATE
-update: async (id, datiNuovi) => {
-  const libro = await libroRepo.findByIdSemplice(id);
-  if (!libro) throw { status: 404, message: 'Libro non trovato.' };
-
-  // Verifica categoria se cambia
-  if (datiNuovi.categoriaId) {
-    const cat = await categoriaRepo.findById(datiNuovi.categoriaId);
-    if (!cat) throw { status: 404, message: `Categoria con id=${datiNuovi.categoriaId} non trovata.` };
-  }
-
-  // Verifica autori se passati
-  if (datiNuovi.autori_ids) {
-    const autori = await Autore.findAll({ where: { id: datiNuovi.autori_ids } });
-    if (autori.length !== datiNuovi.autori_ids.length) {
-      throw { status: 404, message: 'Uno o più autori non esistono.' };
-    }
-  }
-
-  const campiAmmessi = ['titolo', 'isbn', 'annoPubblicazione', 'prezzo', 'disponibile', 'categoriaId'];
-  campiAmmessi.forEach(campo => {
-    if (datiNuovi[campo] !== undefined) libro[campo] = datiNuovi[campo];
-  });
-
-  await libroRepo.save(libro);
-
-  // Se sono passati autori_ids, aggiorna la pivot
-  if (datiNuovi.autori_ids) {
-    await libro.setAutori(datiNuovi.autori_ids);
-  }
-
-  return libroRepo.reload(libro);
-},
-```
-
-`setAutori(idsArray)` è un metodo che Sequelize **genera automaticamente**
-grazie a `belongsToMany`. Sovrascrive la pivot con l'elenco fornito.
-
-### 2.7 Servizio autori: `getById` deve tornare i libri
-
-Già ok se `INCLUDE_LIBRI` in `repository/autore.repository.js` è:
-
-```js
-const INCLUDE_LIBRI = [{
-  model: Libro,
-  as:    'libri',
-  through: { attributes: [] },
-  include: [{ model: Categoria, as: 'categoria' }],
-}];
-```
-
-### 2.8 Popolamento (`scripts/scripts.js`)
-
-Sostituisci `autoreId: X` con `autori_ids: [X, Y]` e poi:
-
-```js
-const [libro] = await Libro.findOrCreate({ where: { isbn }, defaults });
-await libro.setAutori(autori_ids);
-```
+### Messaggio letterale DELETE categoria
+La traccia impone il testo **esatto**: `"Impossibile eliminare: esistono libri associati a questa categoria."`. Copiarlo carattere per carattere. Punto finale compreso.
 
 ---
 
-## 3. RIEPILOGO FILE DA TOCCARE
+## 4. Cheat-sheet Sequelize per l'esame
 
-- [ ] `models/libri.model.js` → **rimuovi** `autoreId`
-- [ ] `models/libro_autore.model.js` → **crea** (nuovo file)
-- [ ] `models/index.js` → sostituisci hasMany/belongsTo Autore↔Libro con `belongsToMany`
-- [ ] `repository/libro.repository.js` → cambia `as: 'autore'` in `as: 'autori'` con `through: { attributes: [] }`
-- [ ] `repository/autore.repository.js` → `INCLUDE_LIBRI` con `through`
-- [ ] `service/libro.service.js` → gestire `autori_ids` in create/update con `setAutori()`
-- [ ] `validator/libro.validator.js` → (opzionale) validare che `autori_ids` sia array
-- [ ] `scripts/scripts.js` → passare `autori_ids` invece di `autoreId`
-- [ ] **DB**: droppa la colonna `autore` dalla tabella `libro`, crea `libro_autore`
-
-**Comandi SQL da eseguire in HeidiSQL prima del test**:
-```sql
-ALTER TABLE libro DROP FOREIGN KEY nome_fk_autore;  -- se c'è
-ALTER TABLE libro DROP COLUMN autore;
-
-CREATE TABLE libro_autore (
-  id_libro  INT NOT NULL,
-  id_autore INT NOT NULL,
-  PRIMARY KEY (id_libro, id_autore),
-  FOREIGN KEY (id_libro)  REFERENCES libro(id),
-  FOREIGN KEY (id_autore) REFERENCES autore(id)
-);
-```
-
-Oppure lascia fare a Sequelize con `sync({ force: true })` una volta sola
-(⚠️ cancella tutti i dati, poi rilancia il seed).
+| Cosa | Sintassi | Note |
+|------|----------|------|
+| Trova per id | `Model.findByPk(id)` | Restituisce `null` se non esiste |
+| Trova con JOIN | `Model.findByPk(id, { include: [{ model, as }] })` | `as` DEVE combaciare con l'associazione |
+| Trova tutti | `Model.findAll({ where, include })` | Restituisce array |
+| Trova per lista di id | `Model.findAll({ where: { id: { [Op.in]: ids } } })` | Verifica esistenza multipla |
+| Ricerca `LIKE` | `where: { titolo: { [Op.like]: `%${q}%` } }` | Case-insensitive con collation `_ci` |
+| Inner join filtrato | `include: [{ model, as, where: {...}, required: true }]` | `required:true` = INNER JOIN |
+| Crea | `Model.create(dati)` | INSERT + SELECT (torna l'istanza) |
+| Salva modifiche | `istanza.save()` | UPDATE sulla riga |
+| Elimina | `istanza.destroy()` | DELETE per id |
+| Ricarica con JOIN | `istanza.reload({ include })` | Utile dopo `setAutori` |
+| Pivot: sostituire | `libro.setAutori([1,2,3])` | Riscrive `libro_autore` |
+| Pivot: aggiungere | `libro.addAutore(id)` | INSERT nella pivot |
+| Pivot: rimuovere | `libro.removeAutore(id)` | DELETE dalla pivot |
+| Nascondere colonne pivot | `through: { attributes: [] }` | Ripulisce il JSON |
 
 ---
 
-## 4. VALIDATOR DA AGGIORNARE (libro)
+## 5. Cheat-sheet status HTTP
 
-`validator/libro.validator.js`:
-
-```js
-validaCreazione: ({ titolo, isbn, autori_ids } = {}) => {
-  const errori = [];
-  if (!titolo || titolo.trim() === '') errori.push('Il campo "titolo" è obbligatorio.');
-  if (!isbn   || isbn.trim()   === '') errori.push('Il campo "isbn" è obbligatorio.');
-  if (autori_ids !== undefined && !Array.isArray(autori_ids)) {
-    errori.push('Il campo "autori_ids" deve essere un array di ID.');
-  }
-  return errori;
-},
-```
+| Codice | Quando | Come farlo |
+|--------|--------|------------|
+| 200 | GET/PUT ok | `res.json(...)` default |
+| 201 | POST create ok | `res.status(201).json(...)` |
+| 204 | DELETE ok | `res.status(204).send()` senza body |
+| 400 | Regola di business violata | `throw { status: 400, message: '...' }` nel service |
+| 404 | Risorsa non trovata | `throw { status: 404, message: '...' }` nel service |
+| 422 | Validazione fallita | `res.status(422).json({ errori })` dopo il validator |
+| 500 | Errore imprevisto | Fallback nel catch del controller |
 
 ---
 
-## 5. NOMI CAMPI: camelCase vs snake_case
+## 6. Domande tipiche dell'orale (preparare risposte a voce)
 
-La traccia usa snake_case (`anno_pubblicazione`, `autori_ids`).
-Il tuo progetto usa camelCase (`annoPubblicazione`).
+1. **Perché `belongsToMany` e non due `hasMany`?**
+   → Perché la relazione libro↔autore è simmetrica: un libro ha molti autori E un autore molti libri. `belongsToMany` genera la tabella pivot e i metodi `setAutori`/`addAutore` per gestire le associazioni. Con due `hasMany` avrei bisogno di una FK diretta, che non basta per il molti-a-molti.
 
-**Scelta consigliata**: mantieni camelCase all'interno del codice JS (idiomatico),
-ma **accetta anche snake_case** nell'input JSON se vuoi essere fedele. Ad esempio
-nel controller `POST /libri` puoi accettare entrambi:
+2. **A cosa serve `libro.setAutori([1, 2, 3])`?**
+   → È un metodo generato automaticamente da Sequelize quando dichiaro `belongsToMany`. Riscrive **completamente** la tabella pivot `libro_autore` con gli id passati: elimina le vecchie righe che non sono più nella lista e aggiunge quelle nuove. Utile per POST/PUT.
 
-```js
-const { autori_ids, autoriIds, ...resto } = req.body;
-const ids = autori_ids || autoriIds || [];
-```
+3. **Perché `through: { attributes: [] }` negli include?**
+   → Per non includere le colonne della tabella pivot nel JSON di risposta. Senza, ogni autore avrebbe un campo `LibroAutore: { id_libro, id_autore }` inutile e sporca l'output. La relazione basta esprimerla come array `autori: [...]`.
 
-Alternativa più semplice: fai finta di niente e usa camelCase ovunque (`autoriIds`).
-Il docente probabilmente accetta perché in JS è la convenzione.
+4. **Perché `/search` prima di `/:id`?**
+   → Express valuta le rotte nell'ordine di dichiarazione. Se `/:id` è prima, una richiesta a `/api/libri/search` matcha `/:id` con `id = "search"` e la rotta di ricerca non viene mai raggiunta.
 
----
+5. **Differenza tra 400, 404 e 422?**
+   → **404** = risorsa cercata non esiste (id sbagliato). **400** = la richiesta è formalmente valida ma viola una regola di business (delete categoria con libri collegati). **422** = i dati inviati sono malformati (campo obbligatorio mancante, tipo sbagliato).
 
-## 6. TEST DEGLI ENDPOINT DOPO LE MODIFICHE
+6. **Perché il validator è separato dal service?**
+   → Separation of concerns. Il validator controlla la **forma** dei dati (obbligatorietà, tipo, formato). Il service applica le **regole di business** (esistenza FK, unicità, integrità). Sono responsabilità diverse: il validator non tocca il DB, il service non tocca `req`/`res`.
 
-Salva un file `test.http` alla radice e usa l'estensione REST Client di VS Code:
+7. **Perché `app.js` è separato da `server.js`?**
+   → `app.js` costruisce ed esporta l'app Express senza aprire alcuna porta. `server.js` importa `app`, verifica la connessione al DB e chiama `app.listen`. Il vantaggio: `app` può essere importato nei test senza avviare il server.
 
-```http
-### 1. Crea categoria
-POST http://localhost:3000/api/categorie
-Content-Type: application/json
+8. **Cos'è un middleware in Express?**
+   → Una funzione con firma `(req, res, next)` che intercetta ogni richiesta prima che arrivi al controller. Esempi: `express.json()` fa il parsing del body, il logger stampa le richieste, l'error handler ha firma `(err, req, res, next)` e cattura gli errori non gestiti.
 
-{ "nome": "Test", "descrizione": "Categoria test" }
+9. **Cos'è `async/await`?**
+   → Sintassi sopra le Promise per scrivere codice asincrono in modo sequenziale. `await` "aspetta" che una Promise si risolva prima di continuare, senza bloccare il thread principale (Node.js resta libero di gestire altre richieste). Rende leggibile un'operazione altrimenti fatta con `.then()` annidati.
 
-### 2. Crea autore
-POST http://localhost:3000/api/autori
-Content-Type: application/json
+10. **Perché `Op.like` funziona case-insensitive in MariaDB?**
+    → Perché la collation di default `utf8mb4_general_ci` (o `_unicode_ci`) è **case-insensitive**. Il `_ci` finale significa "case insensitive". Se il DB usasse `_bin` o `_cs` servirebbe `LOWER()` su entrambi i lati.
 
-{ "nome": "Mario", "cognome": "Rossi", "nazionalita": "Italiana" }
+11. **Cosa fa `reload({ include })` dopo la create?**
+    → Fa una nuova SELECT sulla riga appena creata caricando anche le relazioni (categoria, autori). Senza `reload`, l'istanza in memoria contiene solo i campi diretti del libro, non le relazioni popolate.
 
-### 3. Crea libro con più autori
-POST http://localhost:3000/api/libri
-Content-Type: application/json
-
-{
-  "titolo": "Libro Test",
-  "isbn": "9999999999999",
-  "annoPubblicazione": 2024,
-  "prezzo": 15.0,
-  "disponibile": true,
-  "categoriaId": 1,
-  "autori_ids": [1, 2]
-}
-
-### 4. Ricerca case-insensitive
-GET http://localhost:3000/api/libri/search?q=TEST
-
-### 5. Libri disponibili
-GET http://localhost:3000/api/libri/disponibili
-
-### 6. Libri di una categoria
-GET http://localhost:3000/api/categorie/1/libri
-
-### 7. Delete categoria con libri → deve dare 400
-DELETE http://localhost:3000/api/categorie/1
-```
+12. **Perché la whitelist dei campi nell'update del service?**
+    → Per evitare **mass-assignment**: se il client mandasse `{"id": 9999, "titolo": "..."}`, senza whitelist Sequelize aggiornerebbe anche l'id. La whitelist assicura che solo campi controllati possano essere modificati.
 
 ---
 
-## 7. CHECKLIST FINALE PRE-CONSEGNA
+## 7. Regola d'oro
 
-- [ ] Tutti e 15 gli endpoint funzionanti
-- [ ] Relazione **molti-a-molti** Libri↔Autori con tabella associativa
-- [ ] Status HTTP corretti: 200, 201, 204, 400, 404, 422
-- [ ] Messaggio esatto DELETE categoria: `"Impossibile eliminare: esistono libri associati a questa categoria."` ✅ (già presente)
-- [ ] Ricerca titolo case-insensitive (verifica con maiuscole/minuscole)
-- [ ] `package.json` con script `npm start`
-- [ ] `.env.example` (senza credenziali vere) per il repo
-- [ ] `README.md` con istruzioni:
-  - come clonare
-  - come installare (`npm install`)
-  - come configurare `.env`
-  - come creare DB (SQL script o `sync({ force: true })`)
-  - come popolare (`node scripts/scripts.js`)
-  - come avviare (`npm start`)
-- [ ] Repo GitHub creato + push
-- [ ] `.gitignore` con `node_modules/`, `.env`, `*.log`
+Se copi codice da un vecchio esercizio, **rileggi ogni riga e chiediti "perché è così"**.
+Il prof sa che riusi materiale — quello che valuta è se capisci cosa hai copiato.
 
-**Facoltativi per voto pieno**:
-- [ ] Script seed con 5 categorie, 10 autori, 15 libri ✅ (già presente)
-- [ ] Paginazione: `GET /libri?skip=0&limit=10`
-- [ ] Middleware CORS: `npm i cors` + `app.use(cors())`
-
----
-
-## 8. STRATEGIA TEMPO (se rifai da zero all'esame)
-
-| Minuti | Fase |
-|---|---|
-| 0–10 | Leggere traccia + disegnare ER + segnare i 15 endpoint |
-| 10–20 | Setup: `npm init`, install express/sequelize/mysql2/dotenv, `.env` |
-| 20–40 | `config/database.js` + modelli con **belongsToMany** |
-| 40–60 | `models/index.js` con associazioni + creazione DB |
-| 60–100 | Repository + Service per le 3 entità |
-| 100–130 | Controller + Routes + Validator |
-| 130–150 | Test manuale con REST Client / Postman |
-| 150–170 | Fix bug + endpoint di ricerca |
-| 170–180 | README + commit + push |
-
-**Se invece adatti il progetto esistente**: bastano **40–60 minuti** per fare
-le modifiche del §3 (many-to-many) + test.
-
----
-
-## 9. DOMANDE GUIDATE (§9 della traccia) — RISPOSTE PER JS
-
-1. **Molti-a-molti in Sequelize?**
-   Si usa `belongsToMany` con `through: 'nomeTabella'` (o modello). Sequelize crea/usa
-   la tabella associativa e genera i metodi `set/add/remove` per l'entità:
-   `libro.setAutori([1,2,3])`, `libro.addAutore(4)`, ecc.
-
-2. **Differenza tra input e output?**
-   Nel POST/PUT accetti solo i campi che il client può fornire (senza id, senza relazioni
-   annidate — solo gli `autori_ids`). Nel GET restituisci l'oggetto completo con id e
-   relazioni caricate via `include`.
-
-3. **`from_attributes` equivalente in Sequelize?**
-   In Sequelize non serve: le istanze sono già serializzabili in JSON con `res.json(obj)`.
-   Il concetto analogo è `include`, che dice a Sequelize di caricare le relazioni.
-
-4. **Cancellazione con FK collegate?**
-   Sequelize (o il DB) lancia un errore di integrità referenziale. Va gestito nel
-   service con un controllo preventivo (come fa `categoriaService.delete`).
-
-5. **Ricerca case-insensitive?**
-   MySQL/MariaDB con collation `utf8mb4_general_ci` (default) fa LIKE case-insensitive.
-   In caso di dubbio: `where: { titolo: { [Op.like]: sequelize.literal(`LOWER('%${q}%')`) } }`
-   oppure `fn('LOWER', col('titolo'))`.
-
----
-
-## 10. AVVERTENZA (dalla traccia)
-
-> L'uso di soluzioni generate automaticamente da IA senza comprensione del codice
-> è considerato disonestà accademica. Il docente si riserva di richiedere la spiegazione
-> di qualsiasi parte del codice.
-
-**Come prepararti a spiegare**:
-- Leggi tutti i commenti nel progetto (li abbiamo scritti insieme).
-- Prova a spiegare a voce ogni file (server → app → routes → controller → service → repo → model).
-- Punti che il prof potrebbe chiederti:
-  - **Perché la validazione è separata dal service?** → Separation of concerns
-  - **Cos'è un middleware in Express?** → funzione (req,res,next), viene eseguita per ogni richiesta
-  - **Cos'è belongsToMany?** → many-to-many con tabella pivot
-  - **Perché la whitelist campi in update?** → mass-assignment
-  - **Cos'è async/await?** → sintassi sopra le Promise per rendere leggibile il codice asincrono
-  - **Cos'è un JOIN?** → operazione SQL che unisce righe di due tabelle correlate
-
-**In bocca al lupo!** 🚀
+La nota nella traccia lo dice esplicitamente: *"Il docente si riserva di richiedere la spiegazione di qualsiasi parte del codice consegnato."*
