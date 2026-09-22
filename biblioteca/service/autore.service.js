@@ -1,52 +1,62 @@
 /**
- * service/autoreService.js — Logica di business per Autore
- *
- * A differenza di Categoria non impone unicità (esistono autori omonimi).
- * Regola principale: verificare che l'autore esista prima di update/delete.
+ * service/autore.service.js
+ * Logica di business + query Sequelize (repository "inline").
  */
 
-const repo = require('../repository/autore.repository');
+const { Op } = require('sequelize');
+const { Autore, Libro, Categoria } = require('../models');
+
+// Include standard: autore → libri (many-to-many) → categoria
+// `through: { attributes: [] }` = non includere le colonne della pivot
+// nella risposta JSON.
+const INCLUDE_LIBRI = [{
+  model:   Libro,
+  as:      'libri',
+  through: { attributes: [] },
+  include: [{ model: Categoria, as: 'categoria' }],
+}];
 
 const autoreService = {
 
-  // Restituisce tutti gli autori (con i loro libri joinati dal repo)
-  getAll: async () => repo.findAll(),
+  // Lista con i libri di ciascuno
+  getAll: async () => Autore.findAll({ include: INCLUDE_LIBRI }),
 
-  // Cerca un autore per id (con i suoi libri). 404 se non trovato.
+  // Dettaglio (con libri)
   getById: async (id) => {
-    const autore = await repo.findById(id);
+    const autore = await Autore.findByPk(id, { include: INCLUDE_LIBRI });
     if (!autore) throw { status: 404, message: 'Autore non trovato.' };
     return autore;
   },
 
-  // Crea un nuovo autore: solo INSERT, nessun controllo particolare
+  // Utility usata dal service Libro per verificare che tutti gli id
+  // in autori_ids esistano davvero (SELECT ... WHERE id IN (...))
+  findByIds: (ids) => Autore.findAll({ where: { id: { [Op.in]: ids } } }),
+
+  // Crea nuovo autore
   create: async ({ nome, cognome, nazionalita, annoNascita }) => {
-    // Destrutturazione: passa al repo solo i campi previsti
-    return repo.create({ nome, cognome, nazionalita, annoNascita });
+    return Autore.create({ nome, cognome, nazionalita, annoNascita });
   },
 
-  // Aggiorna un autore esistente
+  // Aggiornamento parziale
   update: async (id, datiNuovi) => {
-    // Uso findByIdSemplice (senza JOIN libri) → più leggero, non serve
-    const autore = await repo.findByIdSemplice(id);
+    const autore = await Autore.findByPk(id);
     if (!autore) throw { status: 404, message: 'Autore non trovato.' };
 
-    // Whitelist dei campi modificabili
     const campiAmmessi = ['nome', 'cognome', 'nazionalita', 'annoNascita'];
-    campiAmmessi.forEach(campo => {
-      if (datiNuovi[campo] !== undefined) autore[campo] = datiNuovi[campo];
+    campiAmmessi.forEach(c => {
+      if (datiNuovi[c] !== undefined) autore[c] = datiNuovi[c];
     });
 
-    await repo.save(autore);
-    // Ricarica con i libri joinati per restituire l'oggetto completo
-    return repo.findById(id);
+    await autore.save();
+    // Ricarica con i libri per restituire l'oggetto completo
+    return Autore.findByPk(id, { include: INCLUDE_LIBRI });
   },
 
-  // Cancella un autore. Non blocca la delete se ha libri (a differenza di Categoria)
+  // Cancella
   delete: async (id) => {
-    const autore = await repo.findByIdSemplice(id);
+    const autore = await Autore.findByPk(id);
     if (!autore) throw { status: 404, message: 'Autore non trovato.' };
-    return repo.delete(autore);
+    return autore.destroy();
   },
 
 };

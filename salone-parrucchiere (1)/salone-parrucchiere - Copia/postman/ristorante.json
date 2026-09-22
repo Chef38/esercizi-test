@@ -1,0 +1,245 @@
+{
+  "info": {
+    "name": "Ristorante API",
+    "description": "Collection dei 15 endpoint REST del backend Ristorante (Node.js + Express + Sequelize + MariaDB).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "Categorie",
+      "item": [
+        {
+          "name": "1 - GET Lista categorie",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorie",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorie"]
+            },
+            "description": "Elenco categorie ordinate per ordineMenu."
+          }
+        },
+        {
+          "name": "2 - POST Crea categoria",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Aperitivi\",\n  \"descrizione\": \"Cocktail e stuzzichini di apertura\",\n  \"ordineMenu\": 7\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categorie",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorie"]
+            },
+            "description": "Crea una nuova categoria. Risposta 201 con la categoria creata."
+          }
+        },
+        {
+          "name": "3 - DELETE Elimina categoria (:id)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorie/7",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorie", "7"]
+            },
+            "description": "Elimina la categoria :id. Se ci sono piatti associati risponde 400."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ingredienti",
+      "item": [
+        {
+          "name": "4 - GET Lista ingredienti",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ingredienti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ingredienti"]
+            },
+            "description": "Elenco di tutti gli ingredienti."
+          }
+        },
+        {
+          "name": "5 - POST Crea ingrediente",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Rucola\",\n  \"allergene\": false,\n  \"unitaMisura\": \"g\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ingredienti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ingredienti"]
+            },
+            "description": "Crea un nuovo ingrediente. Risposta 201."
+          }
+        },
+        {
+          "name": "6 - GET Dettaglio ingrediente (:id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ingredienti/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ingredienti", "1"]
+            },
+            "description": "Dettaglio ingrediente con i piatti che lo utilizzano. Id inesistente => 404."
+          }
+        },
+        {
+          "name": "7 - PUT Aggiorna ingrediente (:id)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Pomodoro San Marzano\",\n  \"allergene\": false,\n  \"unitaMisura\": \"g\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ingredienti/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ingredienti", "1"]
+            },
+            "description": "Aggiorna i dati di un ingrediente esistente."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Piatti",
+      "item": [
+        {
+          "name": "8 - GET Lista piatti",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/piatti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "piatti"]
+            },
+            "description": "Elenco di tutti i piatti con categoria e ingredienti."
+          }
+        },
+        {
+          "name": "9 - POST Crea piatto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Pizza Margherita\",\n  \"descrizione\": \"Pomodoro, mozzarella, basilico\",\n  \"prezzo\": 8.50,\n  \"vegetariano\": true,\n  \"disponibile\": true,\n  \"CategoriaId\": 2,\n  \"ingredientiIds\": [1, 2, 3, 17]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/piatti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "piatti"]
+            },
+            "description": "Crea un nuovo piatto e associa gli ingredienti indicati (setIngredienti)."
+          }
+        },
+        {
+          "name": "10 - GET Dettaglio piatto (:id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/piatti/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "piatti", "1"]
+            },
+            "description": "Dettaglio completo di un singolo piatto (categoria + ingredienti)."
+          }
+        },
+        {
+          "name": "11 - PUT Aggiorna piatto (:id)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Bruschetta al pomodoro e basilico\",\n  \"prezzo\": 5.00,\n  \"disponibile\": true,\n  \"ingredientiIds\": [1, 3]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/piatti/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "piatti", "1"]
+            },
+            "description": "Aggiorna i dati di un piatto esistente e (opzionalmente) i suoi ingredienti."
+          }
+        },
+        {
+          "name": "12 - DELETE Elimina piatto (:id)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/piatti/13",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "piatti", "13"]
+            },
+            "description": "Elimina un piatto (le righe di PiattoIngrediente cascano)."
+          }
+        },
+        {
+          "name": "13 - GET Ricerca piatti (?q=pasta)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/piatti/search?q=pasta",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "piatti", "search"],
+              "query": [
+                { "key": "q", "value": "pasta", "description": "Ricerca case-insensitive LIKE '%pasta%'." }
+              ]
+            },
+            "description": "Ricerca piatti per nome (case-insensitive). Senza 'q' => 400."
+          }
+        },
+        {
+          "name": "14 - GET Piatti vegetariani",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/piatti/vegetariani",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "piatti", "vegetariani"]
+            },
+            "description": "Solo i piatti vegetariani E disponibili, con la loro categoria."
+          }
+        },
+        {
+          "name": "15 - GET Piatti della categoria (:id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorie/2/piatti",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorie", "2", "piatti"]
+            },
+            "description": "Elenco di tutti i piatti di una specifica categoria."
+          }
+        }
+      ]
+    }
+  ]
+}

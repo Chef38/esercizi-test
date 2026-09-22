@@ -103,17 +103,15 @@ biblioteca/
 │   ├── autore.model.js
 │   ├── libri.model.js
 │   └── libro_autore.model.js  # Tabella pivot per many-to-many
-├── repository/            # Solo query DB
-├── service/               # Logica di business
-├── validator/             # Validazione input
-├── controllers/           # Handler HTTP
+├── service/               # Logica di business + query DB (repository inline)
+├── controllers/           # Handler HTTP + validazione input
 ├── routes/                # Definizione endpoint
 └── scripts/
     └── scripts.js         # Popolamento DB
 ```
 
 **Architettura a strati**:
-`routes → controller → validator → service → repository → model → DB`
+`routes → controller (con validator) → service (con query DB) → model → DB`
 
 ---
 

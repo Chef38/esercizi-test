@@ -6,6 +6,9 @@ Rileggerlo prima della prova e tenerlo aperto durante lo svolgimento.
 Progetto di riferimento: **biblioteca** (Node/Express/Sequelize/MariaDB).
 Traccia originale: FastAPI/Python, versione JavaScript autorizzata dal docente.
 
+**Architettura scelta**: `routes → controller (con validator) → service (con query DB) → model → DB`.
+Validator e repository sono stati **assorbiti** rispettivamente nei controller e nei service, per avere meno file da adattare all'esame.
+
 ---
 
 ## 1. Prima di scrivere una riga di codice
@@ -86,12 +89,12 @@ campiAmmessi.forEach(c => { if (datiNuovi[c] !== undefined) libro[c] = datiNuovi
 Serve a evitare **mass-assignment**: se il client manda `{"id": 999}` non deve poter cambiare l'id.
 
 ### `reload()` dopo create/update
-Dopo `libroRepo.create()` e `libro.setAutori()`, l'istanza in memoria non ha le relazioni popolate. Il `reload({ include: INCLUDE_COMPLETO })` rifà una SELECT con JOIN e restituisce l'oggetto completo. Senza `reload` il client riceverebbe un libro senza `categoria` e senza `autori`.
+Dopo `Libro.create()` e `libro.setAutori()`, l'istanza in memoria non ha le relazioni popolate. Il `libro.reload({ include: INCLUDE_COMPLETO })` rifà una SELECT con JOIN e restituisce l'oggetto completo. Senza `reload` il client riceverebbe un libro senza `categoria` e senza `autori`.
 
 ### Autori inesistenti in `autori_ids` → 404
 La traccia (§5, endpoint 9) impone: "se uno degli ID autori non esiste, restituire HTTP 404". Nel service:
 ```js
-const autori = await autoreRepo.findByIds(autori_ids);
+const autori = await autoreService.findByIds(autori_ids);
 if (autori.length !== autori_ids.length) throw { status: 404, message: 'Uno o più autori non esistono.' };
 ```
 
@@ -152,8 +155,11 @@ La traccia impone il testo **esatto**: `"Impossibile eliminare: esistono libri a
 5. **Differenza tra 400, 404 e 422?**
    → **404** = risorsa cercata non esiste (id sbagliato). **400** = la richiesta è formalmente valida ma viola una regola di business (delete categoria con libri collegati). **422** = i dati inviati sono malformati (campo obbligatorio mancante, tipo sbagliato).
 
-6. **Perché il validator è separato dal service?**
-   → Separation of concerns. Il validator controlla la **forma** dei dati (obbligatorietà, tipo, formato). Il service applica le **regole di business** (esistenza FK, unicità, integrità). Sono responsabilità diverse: il validator non tocca il DB, il service non tocca `req`/`res`.
+6. **Perché il validator è dentro il controller e non separato?**
+   → Per snellire la struttura all'esame. Concettualmente sono responsabilità diverse (il validator controlla la **forma** dei dati — obbligatorietà, tipo, formato — mentre il controller adatta HTTP), ma sono così legate che tenerle nello stesso file riduce i salti tra file senza confondere la logica. Le regole di business restano invece nel service, che non tocca `req`/`res`.
+
+6-bis. **E perché il repository è dentro il service?**
+   → Stessa logica: in un progetto d'esame con 15 endpoint la separazione repository↔service aggiunge boilerplate senza benefici. Il service importa direttamente i modelli e fa le query. In un progetto reale con DB intercambiabili o test estesi manterrei il repository separato.
 
 7. **Perché `app.js` è separato da `server.js`?**
    → `app.js` costruisce ed esporta l'app Express senza aprire alcuna porta. `server.js` importa `app`, verifica la connessione al DB e chiama `app.listen`. Il vantaggio: `app` può essere importato nei test senza avviare il server.

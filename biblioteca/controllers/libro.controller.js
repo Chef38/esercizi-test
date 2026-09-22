@@ -1,31 +1,47 @@
 /**
- * controllers/libroController.js
+ * controllers/libro.controller.js
+ * Handler HTTP + validazione input.
  *
- * Handler HTTP per la risorsa Libro.
- * Rispetto agli altri controller ha DUE endpoint aggiuntivi:
- *   - search       (ricerca per titolo)
- *   - getDisponibili (filtro sui libri con disponibile=true)
- *
- * ═══════════════════════════════════════════════════════════════
- *  ✅ TODO ESAME — CONTROLLER (adattatore HTTP):
- *   [ ] Import service + validator
- *   [ ] Ogni handler è async (req, res) => { ... }
- *   [ ] parseInt(req.params.id) SEMPRE
- *   [ ] req.query.xxx per query string (?q=...)
- *   [ ] req.body per POST/PUT
- *   [ ] validaCreazione/validaAggiornamento → 422 se errori
- *   [ ] try/catch con err.status || 500
- *   [ ] Status: 200 default, 201 create, 204 delete, 422 validazione
- *   [ ] module.exports = oggetto con tutti gli handler
- * ═══════════════════════════════════════════════════════════════
+ * Endpoint extra rispetto a un CRUD standard:
+ *   - search        (ricerca titolo case-insensitive)
+ *   - getDisponibili
  */
 
-const service   = require('../service/libro.service');
-const validator = require('../validator/libro.validator');
+const service = require('../service/libro.service');
 
+// ─── Validator inline ───────────────────────────────────────────
+const validaCreazione = ({ titolo, isbn, autori_ids } = {}) => {
+  const errori = [];
+  if (!titolo || titolo.trim() === '') errori.push('Il campo "titolo" è obbligatorio.');
+  if (!isbn   || isbn.trim()   === '') errori.push('Il campo "isbn" è obbligatorio.');
+  if (autori_ids !== undefined) {
+    if (!Array.isArray(autori_ids)) {
+      errori.push('Il campo "autori_ids" deve essere un array di ID.');
+    } else if (autori_ids.some(x => !Number.isInteger(x))) {
+      errori.push('"autori_ids" deve contenere solo numeri interi.');
+    }
+  }
+  return errori;
+};
+
+const validaAggiornamento = ({ titolo, isbn, autori_ids } = {}) => {
+  const errori = [];
+  if (titolo !== undefined && titolo.trim() === '') errori.push('Il campo "titolo" non può essere vuoto.');
+  if (isbn   !== undefined && isbn.trim()   === '') errori.push('Il campo "isbn" non può essere vuoto.');
+  if (autori_ids !== undefined) {
+    if (!Array.isArray(autori_ids)) {
+      errori.push('Il campo "autori_ids" deve essere un array di ID.');
+    } else if (autori_ids.some(x => !Number.isInteger(x))) {
+      errori.push('"autori_ids" deve contenere solo numeri interi.');
+    }
+  }
+  return errori;
+};
+
+// ─── Handler ────────────────────────────────────────────────────
 const libroController = {
 
-  // GET /libri — lista completa dei libri con autore e categoria
+  // GET /libri
   getAll: async (req, res) => {
     try {
       res.json(await service.getAll());
@@ -34,10 +50,8 @@ const libroController = {
     }
   },
 
-  // GET /libri/search?q=... — ricerca libri per titolo (LIKE %q%)
+  // GET /libri/search?q=...
   search: async (req, res) => {
-    // Query string parameters stanno in req.query
-    // Se manca "q" non ha senso cercare → 422 subito
     if (!req.query.q) return res.status(422).json({ errore: 'Il parametro "q" è obbligatorio.' });
     try {
       res.json(await service.search(req.query.q));
@@ -46,7 +60,7 @@ const libroController = {
     }
   },
 
-  // GET /libri/disponibili — solo i libri con disponibile=true
+  // GET /libri/disponibili
   getDisponibili: async (req, res) => {
     try {
       res.json(await service.getDisponibili());
@@ -55,7 +69,7 @@ const libroController = {
     }
   },
 
-  // GET /libri/:id — singolo libro con autore e categoria
+  // GET /libri/:id
   getById: async (req, res) => {
     try {
       res.json(await service.getById(parseInt(req.params.id)));
@@ -64,22 +78,20 @@ const libroController = {
     }
   },
 
-  // POST /libri — crea nuovo libro
+  // POST /libri
   create: async (req, res) => {
-    // Validazione: titolo e isbn obbligatori
-    const errori = validator.validaCreazione(req.body);
+    const errori = validaCreazione(req.body);
     if (errori.length > 0) return res.status(422).json({ errori });
     try {
-      // 201 Created + il libro appena creato (con relazioni caricate dal service)
       res.status(201).json(await service.create(req.body));
     } catch (err) {
       res.status(err.status || 500).json({ errore: err.message });
     }
   },
 
-  // PUT /libri/:id — modifica libro esistente
+  // PUT /libri/:id
   update: async (req, res) => {
-    const errori = validator.validaAggiornamento(req.body);
+    const errori = validaAggiornamento(req.body);
     if (errori.length > 0) return res.status(422).json({ errori });
     try {
       res.json(await service.update(parseInt(req.params.id), req.body));
@@ -88,11 +100,11 @@ const libroController = {
     }
   },
 
-  // DELETE /libri/:id — cancella libro
+  // DELETE /libri/:id
   delete: async (req, res) => {
     try {
       await service.delete(parseInt(req.params.id));
-      res.status(204).send(); // 204 No Content
+      res.status(204).send();
     } catch (err) {
       res.status(err.status || 500).json({ errore: err.message });
     }
